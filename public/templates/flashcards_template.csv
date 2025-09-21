@@ -1,0 +1,4 @@
+Chủ đề,Câu hỏi,Đáp án
+JavaScript cơ bản,Closure  là gì?,Closure là hàm có quyền truy cập các biến trong phạm vi của một hàm khác, ngay cả sau khi hàm đó đã kết thúc
+React cơ bản,React Hooks là gì?,Hooks là tính năng được giới thiệu từ React 16.8, cho phép dùng state và các tính năng React khác mà không cần viết class component
+Git lệnh cơ bản,Cách tạo nhánh mới?,Sử dụng lệnh: git branch <tên_nhánh> để tạo nhánh mới
