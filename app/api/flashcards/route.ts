@@ -64,10 +64,14 @@ Sử dụng định dạng Markdown và trả về **đúng chuẩn JSON hợp l
 
     const flashcards = await getGeminiFlashcards(prompt, systemPrompt);
     return NextResponse.json({ flashcards });
-  } catch (error: any) {
+    } catch (error: unknown) {
     console.error('Tạo flashcard thất bại:', error);
+    let message = 'Tạo flashcard thất bại';
+    if (error instanceof Error) {
+      message = error.message;
+    }
     return NextResponse.json(
-      { error: error.message || 'Tạo flashcard thất bại' },
+      { error: message },
       { status: 500 }
     );
   }

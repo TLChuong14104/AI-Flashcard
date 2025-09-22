@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { MarkedCard } from '@/lib/db'
 import FlashCard from './FlashCard'
+
 
 interface ReviewCardsProps {
   onCardRemoved?: () => void
@@ -12,7 +13,8 @@ export default function ReviewCards({ onCardRemoved }: ReviewCardsProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  const fetchMarkedCards = async () => {
+  // Lấy danh sách thẻ đã đánh dấu
+  const fetchMarkedCards = useCallback(async () => {
     try {
       const response = await fetch('/api/marked-cards')
       const data = await response.json()
@@ -24,30 +26,42 @@ export default function ReviewCards({ onCardRemoved }: ReviewCardsProps) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
+  // Chỉ gọi khi component mount
   useEffect(() => {
     fetchMarkedCards()
+  }, [fetchMarkedCards])
 
+  // Xử lý nút lùi
+  const handlePrevious = useCallback(
+    () => setCurrentCardIndex((prev) => (prev > 0 ? prev - 1 : prev)),
+    []
+  )
+
+  // Xử lý nút tiến
+  const handleNext = useCallback(
+    () =>
+      setCurrentCardIndex((prev) =>
+        prev < markedCards.length - 1 ? prev + 1 : prev
+      ),
+    [markedCards.length]
+  )
+
+  // Xử lý phím trái/phải
+  useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
       if (markedCards.length === 0) return
       if (event.key === 'ArrowLeft') handlePrevious()
       else if (event.key === 'ArrowRight') handleNext()
-      // TODO: Phím Space để lật thẻ (toggleAnswer) – cần truyền ref/toggle từ FlashCard
+      // TODO: Space để lật thẻ
     }
 
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
-  }, [markedCards.length])
+  }, [markedCards.length, handlePrevious, handleNext])
 
-  const handlePrevious = () =>
-    setCurrentCardIndex((prev) => (prev > 0 ? prev - 1 : prev))
-
-  const handleNext = () =>
-    setCurrentCardIndex((prev) =>
-      prev < markedCards.length - 1 ? prev + 1 : prev
-    )
-
+  // Xử lý xóa thẻ đã học
   const handleLearnedCard = async () => {
     if (!markedCards.length) return
     const currentCard = markedCards[currentCardIndex]

@@ -1,12 +1,17 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GEMINI_API_KEY } from "./config";
-import { jsonrepair } from "jsonrepair"; // 👉 thêm package này
+import { jsonrepair } from "jsonrepair"; 
 
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
+export interface GeminiFlashcard {
+  question: string;
+  answer: string;
+}
+
 // Hàm helper để clean JSON response từ Gemini
 function cleanGeminiJsonResponse(text: string): string {
-  let cleaned = text.replace(/```json\s*/gi, "").replace(/```\s*/g, "");
+  const cleaned = text.replace(/```json\s*/gi, "").replace(/```\s*/g, "");
   const startIndex = cleaned.indexOf("[");
   const endIndex = cleaned.lastIndexOf("]");
   if (startIndex === -1) throw new Error("Không tìm thấy JSON array");
@@ -49,7 +54,7 @@ export async function getGeminiCompletion(prompt: string): Promise<string> {
 export async function getGeminiFlashcards(
   prompt: string,
   systemPrompt: string
-): Promise<any[]> {
+): Promise<GeminiFlashcard[]> {
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
@@ -89,11 +94,11 @@ Bắt đầu ngay bằng [`;
     const cleaned = cleanGeminiJsonResponse(content);
     console.log("===== CLEANED JSON =====\n", cleaned);
 
-    let parsed: any[];
+    let parsed: GeminiFlashcard[];
     try {
       parsed = JSON.parse(cleaned);
     } catch {
-      parsed = JSON.parse(jsonrepair(cleaned)); // 👉 vá JSON nếu hỏng
+      parsed = JSON.parse(jsonrepair(cleaned));
     }
 
     if (!Array.isArray(parsed)) throw new Error("Dữ liệu không phải array");

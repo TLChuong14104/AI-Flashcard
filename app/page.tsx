@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import FlashCard from "./components/FlashCard";
 import SettingsDialog from "./components/SettingsDialog";
 import ReviewCards from "./components/ReviewCards";
@@ -32,39 +32,41 @@ export default function Home() {
 
   // Lấy các thẻ đã đánh dấu
   const fetchMarkedCards = async () => {
-  try {
-    const response = await fetch('/api/marked-cards');
-    const data = await response.json();
+    try {
+      const response = await fetch('/api/marked-cards');
+      const data = await response.json();
+      type MarkedCard = { question: string; answer: string; topic?: string };
+      const marked = new Set<string>(
+        (data.markedCards as MarkedCard[]).map(card => String(card.question))
+      );
+      setMarkedCards(marked);
+    } catch (error) {
+      console.error('Lấy thẻ đã đánh dấu thất bại:', error);
+    }
+  };
 
-    // Ép kiểu mỗi question thành string
-    const marked = new Set<string>(data.markedCards.map((card: any) => String(card.question)));
-    setMarkedCards(marked);
-  } catch (error) {
-    console.error('Lấy thẻ đã đánh dấu thất bại:', error);
-  }
-};
+  // Navigation functions dùng useCallback
+  const handlePrevious = useCallback(() => {
+    setCurrentCardIndex((prev) => (prev > 0 ? prev - 1 : prev));
+  }, []);
 
+  const handleNext = useCallback(() => {
+    setCurrentCardIndex((prev) =>
+      prev < flashcards.length - 1 ? prev + 1 : prev
+    );
+  }, [flashcards.length]);
 
+  // Chỉ một useEffect cho navigation
   useEffect(() => {
     fetchMarkedCards();
-   
-
     const handleKeyPress = (event: KeyboardEvent) => {
       if (flashcards.length === 0) return;
-      if (event.key === 'ArrowLeft') {
-        handlePrevious();
-      } else if (event.key === 'ArrowRight') {
-        handleNext();
-      }
+      if (event.key === 'ArrowLeft') handlePrevious();
+      else if (event.key === 'ArrowRight') handleNext();
     };
-
     window.addEventListener('keydown', handleKeyPress);
-
-    // 清理事件监听
-    return () => {
-      window.removeEventListener('keydown', handleKeyPress);
-    };
-  }, [flashcards.length]);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [flashcards.length, handleNext, handlePrevious]);
 
   const handleSubmit = async () => {
     if (!apiKey) {
@@ -103,16 +105,6 @@ export default function Home() {
     }
   };
 
-  const handlePrevious = () => {
-    setCurrentCardIndex((prev) => (prev > 0 ? prev - 1 : prev));
-  };
-
-  const handleNext = () => {
-    setCurrentCardIndex((prev) =>
-      (prev < flashcards.length - 1 ? prev + 1 : prev)
-    );
-  };
-
   const handleMarkCard = async () => {
     const currentCard = flashcards[currentCardIndex];
     const isMarked = markedCards.has(currentCard.question);
@@ -134,7 +126,7 @@ export default function Home() {
       console.error('Đánh dấu thẻ thất bại:', error);
     }
   };
-
+  
   const resetState = () => {
     setFlashcards([]);
     setCurrentCardIndex(0);

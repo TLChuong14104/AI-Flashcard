@@ -32,10 +32,14 @@ Vui lòng trả về trực tiếp danh sách chủ đề, mỗi dòng một ch�
       .filter(t => t.length > 0);
 
     return NextResponse.json({ topics });
-  } catch (error: any) {
+    } catch (error: unknown) {
     console.error('Khám phá chủ đề thất bại:', error);
+    let message = 'Khám phá chủ đề thất bại';
+    if (error instanceof Error) {
+      message = error.message;
+    }
     return NextResponse.json(
-      { error: error.message || 'Khám phá chủ đề thất bại' },
+      { error: message },
       { status: 500 }
     );
   }
