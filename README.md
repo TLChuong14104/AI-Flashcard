@@ -75,7 +75,22 @@ hoặc
 yarn install
 ```
 
-### 3. Tạo file môi trường `.env.local`
+### 3. Cài đặt các gói bổ sung
+Cài đặt các gói cần thiết
+```sh
+npm install jsonrepair
+```
+```sh
+npm install @google/generative-ai
+```
+```sh
+npm install -D tailwindcss postcss autoprefixer
+```
+```sh
+yarn add -D @types/better-sqlite3
+```
+
+### 4. Tạo file môi trường `.env.local`
 
 Tại thư mục gốc, tạo file `.env.local`:
 ```env
