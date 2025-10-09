@@ -12,7 +12,7 @@ export default function SettingsDialog({ onApiKeyChange }: SettingsDialogProps) 
 
   useEffect(() => {
     // Tải API Key đã lưu trong localStorage
-    const savedApiKey = localStorage.getItem('deepseek_api_key');
+    const savedApiKey = localStorage.getItem('GEMINI_API_KEY');
     if (savedApiKey) {
       setApiKey(savedApiKey);
       onApiKeyChange(savedApiKey);
@@ -20,7 +20,7 @@ export default function SettingsDialog({ onApiKeyChange }: SettingsDialogProps) 
   }, [onApiKeyChange]);
 
   const handleSave = () => {
-    localStorage.setItem('deepseek_api_key', apiKey);
+    localStorage.setItem('GEMINI_API_KEY', apiKey);
     onApiKeyChange(apiKey);
     setSaveSuccess(true);
     setTimeout(() => {
